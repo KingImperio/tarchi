@@ -195,4 +195,4 @@ TArchI position:
 Trade: sacrifice quantum parallelism for simplicity, verifiability, and deterministic correctness.
 
 ---
-**See also**: `../charter.md`, `../nubit.md`, `../package-format.md`, `../discussion/discussion.json`
+**See also**: `charter.md`, `nubit.md`, `package-format.md`, `../discussion/discussion.json`

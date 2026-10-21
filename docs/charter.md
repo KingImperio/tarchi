@@ -124,7 +124,7 @@ Continuous knowledge growth through:
 - `package-format.md` - Distribution format
 - `decisions/ADRs.md` - Architecture decisions
 - `../discussion/discussion.json` - Full decision record
-- `../PLAN.md` - Implementation plan
+- `PLAN.md` - Implementation plan
 
 ## Implementation Context
 
