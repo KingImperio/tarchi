@@ -1,0 +1,11 @@
+target/
+**/*.rs.bk
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.tarchi
+bench/out/
+corpus/raw/
+.idea/
+.vscode/
