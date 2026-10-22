@@ -1,15 +1,18 @@
 # Nubit.md - Core Inference Primitive for TArchI
-# draft, 2026-10-21
+# revised, 2026-10-22 post M0.6 review
 
 ## 1. Nubit Definition
 
 ```rust
 // Nubit: unit of PROJECTION — one slot in a state's fan-out of possible legal NEXT states
 struct Nubit {
-    target: NodeId,      // The resulting state node ID if this Nubit is selected
-    polarity: Trit,       // Supports (+1), opposes (-1), or undetermined (0)
-    confidence: Baldec, // Integer trust: [-5, +5] (Baldec scale)
-    legality: Legality,  // First-class verdict: Legal or Illegal with rule reference
+    target: NodeId,              // The resulting state node ID if this Nubit is selected
+    polarity: Trit,              // Supports (+1), opposes (-1), or undetermined (0)
+    confidence: Baldec,          // Unsigned strength [0, +5] with separate polarity
+    legality: Legality,          // First-class verdict: Legal or Illegal with rule reference
+    rule_id: RuleId,             // The inference rule licensing this transition
+    premise_ids: Vec<NodeId>,    // Explicit premise node IDs (for proof DAG)
+    substitution: Substitution,  // Variable bindings for this inference step
 }
 
 enum Legality {
@@ -20,15 +23,18 @@ enum Legality {
 // A set of projected successors from one origin node
 struct NubitSet {
     origin: NodeId,
-    slots: Vec<Nubit>,  // Exact fan-out; all members are checked before use
+    slots: Vec<Nubit>,  // All members checked before use; only Legal survive to planner
 }
 ```
 
 **Field semantics:**
 - `target`: Hash of the successor state (deterministic mapping from substrate transition)
 - `polarity`: Trit representing the Nubit's stance toward the anchor (-1 oppose, 0 undetermined, +1 support)
-- `confidence`: Baldec integer confidence from substrate axioms, derived from derived certainty
-- `legality`: First-class field preventing unrepresentable states; illegal Nubits are excluded from consideration entirely
+- `confidence`: Unsigned Baldec [0, +5] — strength of evidence; opposition is carried by `polarity`
+- `legality`: First-class field preventing unrepresentable states; illegal Nubits are excluded from planner consideration entirely
+- `rule_id`: Stable identifier of the inference rule (e.g., `axiom:and_intro`)
+- `premise_ids`: Explicit list of premise nodes this inference depends on
+- `substitution`: Variable bindings used in this inference step
 
 **Why first-class legality?** Violation becomes a type error rather than a probabilistic hallucination. Illegal states are pruned from the universe before they can be reasoned about, preserving semantic integrity.
 
@@ -41,8 +47,8 @@ struct NubitSet {
 **TArchI projection is third kind:** DETERMINISTIC enumeration of REACHABLE states with polarity and confidence, computed directly from the substrate. Every successor is checkable against hard constraints.
 
 **Cost/benefit:**
-- **Bounded fan-out:** Limited to local neighborhood (legal moves from current state)
-- **Parallel computation:** Full set computed simultaneously
+- **Bounded fan-out:** Limited to indexed, query-conditioned joins (not "all at once" — see §6)
+- **Parallel computation:** Full set computed simultaneously via indexed iteration
 - **Checkable members:** Each Nubit's legality is verifiable before use
 - **Analogy:** Rubik's position's legal-turn set = NubitSet; Chess position's legal-move set = branching strategy
 
@@ -54,7 +60,7 @@ The Rubik Layer validates EVERY projected Nubit against hard substrate constrain
 - Axiom set (semantic integrity)
 - Type constraints (node/edge topology)
 - Uniqueness (no duplicate NodeIds)
-- Structural invariants (e.g., no cycles in DAG)
+- Structural invariants (e.g., no cycles in DAG for acyclic relations)
 
 **Verification procedure:**
 1. For each Nubit in a NubitSet, apply all constraint checks
@@ -65,72 +71,105 @@ The Rubik Layer validates EVERY projected Nubit against hard substrate constrain
 
 **Re-verification on load:** Every fact in a .tarchi package undergoes full re-verification against current axiom set. Package integrity is hash-verifiable, semantic integrity is constraint-verifiable (weights can never have semantic weight — only hash weight).
 
-## 4. The Chess Layer — Adversarial Planner
+## 4. Inference Core (NEW — replaces "Chess Layer" section)
 
-Best-first search over Nubit fan-out with structural value estimation, no learned policy network.
+The inference kernel is a **finite, typed, function-free Horn rule system** with explicit signed atoms.
 
-**Value function Q(t) (trinary adaptation):**
-```rust
-// Three trit components, each -1/0/+1
-struct Coverage { fraction_of_anchor_neighbors_grounded }
-struct ChainCompleteness { exists_grounded_path_from_foundational_node }
-struct ContradictionAbsence { no_active_conflict_on_path }
-
-// Convert to Baldec [-5,+5]
-fn compute_q(coverage: Trit, completeness: Trit, contradiction: Trit) -> Baldec {
-    let sum = coverage as i8 + completeness as i8 + contradiction as i8;
-    (5 * sum / 3).clamp(-5, 5)  // round(5 * mean(components))
-}
+### Rule Form
 ```
+Head :- Body1, Body2, ..., BodyN.
+```
+- `Head` and `Body` are signed literals: `+P(args)` or `-P(args)` (explicit negation)
+- Variables are range-restricted (appear in a positive body literal)
+- Built-ins: bounded arithmetic (`+`, `-`, `*`, `/`, comparison), typed equality
+- No unrestricted negation-as-failure; negation is explicit signed literal
+- Recursion permitted with depth bound
 
-**Planner components:**
-- **COVERAGE:** Fraction of anchor's neighbors that are grounded/held
-- **CHAIN COMPLETENESS:** Existence of complete grounded path from FOUNDATIONAL node
-- **CONTRADICTION ABSENCE:** No active conflict on the path
+### Query Evaluation
+- **Demand-driven tabled evaluation** (SLG-style with subgoal memoization)
+- Indexed joins on predicate + leading arguments
+- Memoization keyed by normalized goal + bindings + axiom/rules snapshot hash
+- Returns: `Proved(ref)`, `Refuted(ref)`, `Unknown`, `Conflicted`, `ResourceLimit`
 
-**Planner vs Optimizer split:**
-- **Rubik = Micro execution:** Shortest deterministic path within a branch (selection of successor states)
-- **Chess = Macro strategy:** Which branch to explore (value-based ordering)
-
-## 5. Derivation Traces
-
-A resolution is a PATH, not just an answer. Each step is citable:
+### Proof Objects
+Every successful derivation produces a **Proof DAG** (not a linear path):
 
 ```rust
-struct DerivationStep {
-    edge: EdgeId,          // Which Nubit edge was taken
-    nubit: Nubit,          // The selected Nubit with polarity/confidence
-    axioms: Vec<AxiomId>,   // Axioms that licensed this transition
-    timestamp: Instant,
+struct ProofNode {
+    id: ProofNodeId,                    // Sequential namespaced ID
+    rule_id: RuleId,                    // e.g., "axiom:and_intro"
+    premise_ids: Vec<ProofNodeId>,      // DAG edges to premises
+    substitution: Substitution,         // Variable bindings
+    conclusion: SignedLiteral,          // +P(args) or -P(args)
+    snapshot_hash: [u8; 32],            // Immutable axiom/rules snapshot
 }
 
-type DerivationTrace = Vec<DerivationStep>;
+struct ProofDag {
+    nodes: Vec<ProofNode>,
+    root: ProofNodeId,                  // The query conclusion
+}
 ```
 
 **Trace properties:**
-- Claims are citable: "See step 3, edge Nubit #7, rule axiom:identity"
-- Packages that only memorize answers score zero on derivation suite
-- Realizer renders traces into human-explainable explanations
+- Claims are citable: "See ProofNode #47, rule `axiom:and_intro`, premises #45,#46"
+- Independent checker replays applications without trusting planner legality labels
+- Conjunction requires two premises; De Morgan cannot introduce negation from positive premises alone
 
-**Example trace (propositional logic):**
+**Example (corrected):**
 ```
-1. [premise] P (axiom:axiom_001) polarity:+1 confidence:+5 legality:Legal
-2. [premise] Q (axiom:axiom_002) polarity:+1 confidence:+5 legality:Legal
-3. [inference] P ∧ Q (edge:Nubit_017 polarity:+1 confidence:+4 legality:Legal) using modus_ponens
-4. [inference] ¬(P ∧ Q) (edge:Nubit_023 polarity:-1 confidence:+3 legality:Legal) using De_Morgan
-5. [contradiction] P ∧ Q ⇒ ⊥ (edge:Nubit_042 polarity:-1 confidence:+5 legality:Legal) contradiction injection
+Premise 1: +P(a) (axiom:premise_001)
+Premise 2: +Q(a) (axiom:premise_002)
+Step 3: +R(a,b) := and_intro(+P(a), +Q(a))      // rule:and_intro
+Step 4: +S(a,b) := external_assertion(-R(a,b))   // rule:external_obs (source: human_001)
+Step 5: CONFLICT(+R(a,b), -R(a,b))               // rule:conflict_detect
 ```
+No step derives ¬(P∧Q) from P,Q alone.
 
-## 6. Active Front — The Frontier
+## 5. Value Function Q_baldec
 
-**Node selection:** Frontier is the node with highest charge/tension among unexhausted, non-contradicted nodes connected to the anchor.
+```rust
+// Three trit components, each -1/0/+1
+struct Coverage { fraction_of_anchor_neighbors_grounded }  // trit: +1 if >0.5, 0 if ≈0.5, -1 if <0.5
+struct ChainCompleteness { exists_grounded_path_from_foundational_node } // trit
+struct ContradictionAbsence { no_active_conflict_on_path } // trit
 
-**Hot-page residency:** Frontier pins its pages (axioms plus active chain) in resident working set. This is a reasoning decision, not LRU cache eviction.
+// Convert to Baldec [-5,+5] — rounding specified
+fn compute_q(coverage: Trit, completeness: Trit, contradiction: Trit) -> Baldec {
+    let sum = coverage as i8 + completeness as i8 + contradiction as i8; // range -3..+3
+    // Quantization thresholds (7 distinct outputs):
+    // sum=-3 → -5, -2 → -3, -1 → -1, 0 → 0, +1 → +1, +2 → +3, +3 → +5
+    match sum {
+        -3 => -5,
+        -2 => -3,
+        -1 => -1,
+        0  => 0,
+        1  => 1,
+        2  => 3,
+        3  => 5,
+    }
+}
+```
+**Notes:**
+- Q is a **search priority heuristic**, not a correctness signal
+- No opponent model, no shortest-path guarantee — "Chess" is an analogy, not an adversarial objective
+- Tie-break: deterministic (smallest ProofNodeId)
+
+## 6. Active Front — The Frontier (Revised)
+
+**Fan-out bound:** Legal successors are produced by **indexed, resumable iterators** with explicit budgets:
+- Max 100,000 proof applications per query
+- Max 64 MiB frontier/tables
+- Max 2 seconds wall time
+- Return `ResourceLimit` when exceeded — never false
+
+**Node selection:** Frontier is the node with highest charge among unexhausted, non-conflicted nodes connected to the anchor, bounded by the above.
+
+**Hot-page residency:** Frontier pins its pages (axioms plus active chain) in resident working set. This is a reasoning decision, not LRU cache eviction. **Pin caps and spill/recompute policies are enforced by the pager.**
 
 **Process:**
-1. Evaluate charge/tension of all frontier candidates
-2. Select highest (fixed tie-break rule: smallest NodeId)
-3. Materialize relevant axioms and path
+1. Evaluate charge of all frontier candidates within budget
+2. Select highest (fixed tie-break: smallest NodeId)
+3. Materialize relevant axioms and path (bounded)
 4. Push onto working set
 5. Begin derivation steps
 
@@ -138,49 +177,51 @@ type DerivationTrace = Vec<DerivationStep>;
 
 **EXHAUSTED nodes:** Stop moving when all outgoing Nubits have been explored or have confidence ≤ -5.
 
-**CONTRADICTED nodes:** Cannot resolve until contradiction is discharged via upstream propagation draining the contradiction trit.
+**CONFLICTED nodes:** Active conflict detected via Rubik layer (opposing evidence on same canonical atom). Cannot resolve until conflict is discharged via dependency-aware invalidation and recomputation.
 
-**CONTRADICTION injection:** From human oversight channel reopens RESOLVED nodes when new contradiction evidence appears, triggering recomputation of affected subgraphs.
+**CONTRADICTION injection:** From human oversight channel reopens RESOLVED nodes when new contradiction evidence appears, triggering recomputation of affected subgraphs (reverse dependencies or bounded recomputation).
 
 **STALL detection:** Nodes that have no Legal outgoing Nubits or have confidence ≤ -5 enter STALL state.
 
-## 8. Worked Example — Propositional Logic Domain
+## 8. Worked Example — Propositional Logic Domain (Corrected)
 
 **Substrate state:**
 ```rust
 // Anchor node A
 struct NodeA {
-    facts: ["P", "Q"],  // Premises
-    inferred: [],        // Empty
-    contradictions: [],  // Empty
+    facts: ["P(a)", "Q(a)"],  // Premises
+    inferred: [],              // Empty
+    contradictions: [],        // Empty
 }
 ```
 
 **Nubit projection (fan-out):**
 ```
-Nubit_017: target=N_B (P∧ Q), polarity:+1, confidence:+4, legality:Legal (axiom:and_intro)
-Nubit_023: target=N_C (¬(P∧ Q)), polarity:-1, confidence:+3, legality:Legal (axiom:De_Morgan)
-Nubit_042: target=N_D (⊥), polarity:-1, confidence:+5, legality:Legal (axiom:contradiction)
+Nubit_017: target=N_B (+R(a,b) = P(a) ∧ Q(a)), polarity:+1, confidence:+4, legality:Legal, rule:and_intro, premises:[P(a), Q(a)]
+Nubit_023: target=N_C (external assertion -R(a,b)), polarity:-1, confidence:+5, legality:Legal, rule:external_obs, premises:[source:human_001]
+Nubit_042: target=N_D (conflict +R ∧ -R), polarity:-1, confidence:+5, legality:Legal, rule:conflict_detect, premises:[N_B, N_C]
 ```
 
-**Rubik verification:** All three Nubits legal — no constraint violations.
+**Rubik verification:** All three Nubits legal — no constraint violations. Note: Nubit_023 is an *external observation* (source-qualified), not a theorem from P,Q.
 
 **Chess search path:**
-1. Evaluate Nubit_017: Q = compute_q(+1, +1, -1) = +1 Baldec
-2. Evaluate Nubit_023: Q = compute_q(-1, 0, +1) = -1 Baldec  
-3. Evaluate Nubit_042: Q = compute_q(-1, -1, +1) = -2 Baldec
+1. Evaluate Nubit_017: Q = compute_q(+1, +1, +1) = +5 Baldec
+2. Evaluate Nubit_023: Q = compute_q(-1, 0, +1) = -1 Baldec
+3. Evaluate Nubit_042: Q = compute_q(-1, -1, -1) = -5 Baldec
 4. Select Nubit_017 (highest Q)
 
-**Resulting derivation trace:**
+**Resulting Proof DAG (not linear trace):**
 ```
-[step1] P∧ Q (Nubit_017) via axiom:and_intro
-[step2] ⊥ (Nubit_042) via contradiction injection
-[step3] Resolution: P∧ Q ⇒ ⊥ (Nubit_042) with contradiction discharge
+ProofNode#1:  +P(a)              [axiom:premise_001]
+ProofNode#2:  +Q(a)              [axiom:premise_002]
+ProofNode#3:  +R(a,b) = P∧Q      [rule:and_intro, premises:#1,#2]
+ProofNode#4:  -R(a,b)            [rule:external_obs, source:human_001]
+ProofNode#5:  CONFLICT           [rule:conflict_detect, premises:#3,#4]
 ```
 
 ## 9. Invariants and Property Tests
 
-### checklist for Rust crate `nubit`:
+### Checklist for Rust crate `nubit`:
 
 1. **Legality coverage:** Every projected Nubit is either `Legal` or carries a `rule` in `Illegal` variant.
 
@@ -188,19 +229,29 @@ Nubit_042: target=N_D (⊥), polarity:-1, confidence:+5, legality:Legal (axiom:c
 
 3. **Re-verification consistency:** Re-loading a package and re-verifying against axioms reproduces identical legality verdicts.
 
-4. **Trace reproducibility:** Multiple runs with identical inputs produce identical DerivationTrace sequences.
+4. **Proof DAG reproducibility:** Multiple runs with identical inputs produce identical ProofDag sequences (up to namespaced ID allocation order).
 
 5. **Deterministic frontier selection:** Under fixed tie-break rule, frontier node selection is deterministic across runs.
 
-6. **Illegal exclusion:** No Illegal Nubit appears in any successful DerivationTrace.
+6. **Illegal exclusion:** No Illegal Nubit appears in any successful ProofDag.
 
-7. **Confidence bounds:** Baldec values always within [-5, +5].
+7. **Confidence bounds:** Baldec values always within [0, +5] (unsigned); polarity carries sign.
 
 8. **Polarity integrity:** Trit values restricted to {-1, 0, +1}.
+
+9. **Proof checker independence:** An independent checker replays ProofDag applications and verifies each step's premises, substitution, and conclusion without trusting planner labels.
+
+10. **Resource limit distinctness:** `ResourceLimit` outcome is distinguishable from `Unknown` and `Refuted`.
 
 **Test scenarios:**
 - Property-based testing: Generate random substrate states, verify all projections are deterministic
 - Exhaustive verification: Small domain where all possible NubitSets can be enumerated
-- Trace replay: Execute DerivationTrace independently, verify outcome matches
+- Proof replay: Execute ProofDag independently, verify outcome matches
+- Adversarial: Inject false premise, verify conflict detection and invalidation
+- Resource exhaustion: Verify ResourceLimit returned at budget boundaries
 
-See also: charter.md, tridak.md, package-format.md, ../discussion/discussion.json
+---
+
+See also: `charter.md`, `tridak.md`, `package-format.md`, `../discussion/discussion.json`
+
+(End of file)

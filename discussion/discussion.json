@@ -5,7 +5,7 @@
     "archaion_meaning": "Intelligence From The Beginning — derivation from foundational axioms rather than interpolation from a corpus",
     "meaning_of_true": "Trinary truth values: -1 false, 0 unknown, +1 true, applied across multiple orthogonal layers (proposition, node, edge)",
     "recorded_by": "Fola Adam",
-    "date": "2026-10-21",
+    "date": "2026-10-22",
     "session_type": "standalone_git_repo",
     "status": "active",
     "plan_file": "/home/fola/.kilo/plans/1792577274907-tarchi-trinary-intelligence-plan.md",
@@ -16,19 +16,19 @@
     }
   },
   "glossary": {
-    "Tridak": "Base-3 balanced digit {-1,0,+1}, atomic load/offload unit for TArchI",
-    "Balradix": "Numeral family: base-3 (Tridak) for atomic ops, base-10 (Baldec) for higher-level encoding, enables sign-free arithmetic",
-    "Baldec": "Base-10 balanced digit {-5..+5}, used for strength graduation and promotion in curriculum",
-    "Nubit": "Generalization of chess pieces: projects ALL legal successor states of a state at once with polarity and confidence",
-    "Astra": "Verifiable capability of 27B-param reference LLM, measured on knowledge-recall AND derivation suites",
-    "rubik_layer": "Deterministic verifier: closed finite group action, illegal states unrepresentable, zero hallucination by construction",
-    "chess_layer": "Adversarial planner: branching, value-estimating, maps to Nubit generalization",
-    "curriculum": "Knowledge acquisition pipeline replacing gradient descent: corpus -> template extraction -> canonicalization -> verification -> rule induction -> promotion -> decay/quarantine",
-    "substrate": "The explicit trinary knowledge representation containing axioms, rules, and facts at multiple layers",
+    "Tridak": "Base-3 balanced digit {-1,0,+1}, atomic logical update unit for TArchI",
+    "Balradix": "Numeral family: base-3 (Tridak) for atomic ops, odd bases only; balanced radix needs no sign bit, negates for free, single canonical zero",
+    "Baldec": "11-level ordinal score {-5..+5}, stored in 4 bits, used for strength graduation and promotion — not a positional radix-10 digit",
+    "Nubit": "Unit of projection: one legal successor state with polarity, unsigned confidence, legality, rule_id, premise_ids, substitution",
+    "Astra": "Portable knowledge artifact; capability measured by frozen two-suite vector (recall + derivation) against a documented 27B reference checkpoint",
+    "rubik_layer": "Deterministic verifier: illegal states unrepresentable, independent proof checker",
+    "chess_layer": "Bounded heuristic search over Nubit fan-out with explicit budgets; no opponent model, no shortest-path guarantee",
+    "curriculum": "Knowledge acquisition pipeline: corpus -> template extraction -> canonicalization -> verification -> promotion -> decay(priority) -> graduation -> lossless schema factoring",
+    "substrate": "Explicit trinary knowledge representation containing axioms, rules, and facts at multiple layers",
     "four_trit_roles": "Orthogonal trinary roles across layers: Truth (proposition), Polarity (edge), Epistemic (ledger), Balance (node charge)",
-    "node_27_states": "Combinations of (truth, epistemic, balance) = 27 distinct node states with deterministic lifecycle mapping",
-    "realizer": "Trait adapter that constructs answers from resolved substrate plus derivation paths for generation",
-    "tarchi_package": ".tarchi format: knowledge package with 4KiB mmap-able pages, Balradix-coded page table, two-tier integrity, composable and delta-updatable"
+    "node_27_states": "Combinations of (truth, epistemic, balance) = 27 distinct semantic states; lifecycle is a derived classifier with external inputs",
+    "realizer": "Trait adapter that constructs answers from resolved substrate plus ProofDAG for generation",
+    "tarchi_package": ".tarchi format: knowledge package with 4KiB mmap-able pages, u64 page table, block codec, two-tier integrity, composable and delta-updatable"
   },
   "decisions": [
     {
@@ -42,7 +42,8 @@
       ],
       "answer": "Established TArchI as independent project at /home/fola/tarchi",
       "rationale": "Clean separation enables focused development and independent benchmarking from oracule-core prototype",
-      "consequences": ["Independent evolution", "Focused benchmarking", "Increased maintenance complexity"]
+      "consequences": ["Independent evolution", "Focused benchmarking", "Increased maintenance complexity"],
+      "status": "accepted"
     },
     {
       "id": "D02",
@@ -55,7 +56,9 @@
       ],
       "answer": "Implemented three-level trinary layering simultaneously",
       "rationale": "Enables comprehensive knowledge representation across different abstraction levels",
-      "consequences": ["Richer representation", "Increased complexity", "27 distinct node states"]
+      "consequences": ["Richer representation", "Increased complexity", "27 distinct node states"],
+      "status": "superseded",
+      "superseded_by": "D03"
     },
     {
       "id": "D03",
@@ -68,7 +71,8 @@
       ],
       "answer": "Defined four orthogonal trinary roles across four layers",
       "rationale": "Enables nuanced representation of truth, relationships, confidence, and stability",
-      "consequences": ["27 node states", "Deterministic lifecycle", "Comprehensive modeling capability"]
+      "consequences": ["27 node states", "Deterministic lifecycle classifier with external inputs", "Comprehensive modeling capability"],
+      "status": "accepted"
     },
     {
       "id": "D04",
@@ -81,33 +85,38 @@
       ],
       "answer": "Built complete self-contained intelligence stack",
       "rationale": "No external dependencies, full autonomy, enables unique capabilities and benchmarking",
-      "consequences": ["Full autonomy", "Higher complexity", "Comprehensive functionality"]
+      "consequences": ["Full autonomy", "Higher complexity", "Comprehensive functionality"],
+      "status": "deferred",
+      "note": "v0.1 delivers read-only resolve/explain/cite; act/induction deferred"
     },
     {
       "id": "D05",
-      "topic": "Archaion Principle",
+      "topic": "Archaion Principle (Revised)",
       "question": "How should intelligence be derived — from axioms or from data?",
       "options": [
-        {"label": "Axiomatic derivation", "recommended": true, "description": "From foundational axioms and logical derivation"},
+        {"label": "Axiomatic derivation with premise qualification", "recommended": true, "description": "From foundational axioms and logical derivation; empirical claims are source-qualified"},
         {"label": "Data interpolation", "recommended": false, "description": "Learning patterns from corpus"},
         {"label": "Hybrid approach", "recommended": false, "description": "Combine both methods"}
       ],
-      "answer": "Adopted Archaion: Intelligence From The Beginning",
-      "rationale": "Ensures traceable, verifiable reasoning with no hallucination",
-      "consequences": ["Traceable reasoning", "Verifiable conclusions", "Requires axiom corpus", "Harder domain adoption"]
+      "answer": "Adopted Archaion: checked entailment conditional on explicit trusted premises; empirical observations are attributed, not established as universal truth",
+      "rationale": "Ensures traceable, verifiable reasoning; axiom consistency cannot establish empirical truth",
+      "consequences": ["Traceable reasoning", "Verifiable conclusions", "Requires axiom corpus", "Harder domain adoption", "Premise/trust metadata required"],
+      "status": "accepted",
+      "supersedes": "original D05 universal truth claim"
     },
     {
       "id": "D06",
-      "topic": "Staged Development",
+      "topic": "Staged Development (Reordered)",
       "question": "How should development scope be managed — fixed upfront or staged?",
       "options": [
-        {"label": "Staged milestones", "recommended": true, "description": "M0-M7 with independent verifiability"},
+        {"label": "Staged milestones with early device gate", "recommended": true, "description": "M0-M7 with device feasibility before M5, M0 reopened for contract repair"},
         {"label": "Fixed scope", "recommended": false, "description": "Complete specification upfront"},
         {"label": "Agile sprints", "recommended": false, "description": "Feature-based iteration"}
       ],
-      "answer": "Implemented staged development with M0-M7 milestones",
-      "rationale": "Manageable development with regular validation points and flexibility for scope adjustment",
-      "consequences": ["Manageable development", "Regular validation", "Interdependency complexity"]
+      "answer": "Implemented staged development with M0-M7 milestones; M0 reopened for contract repair; device feasibility moved before M5",
+      "rationale": "Manageable development with regular validation; pivotal risks (device, density, soundness) gated early",
+      "consequences": ["Manageable development", "Regular validation", "Early falsification gates", "Interdependency management"],
+      "status": "accepted"
     },
     {
       "id": "D07",
@@ -120,59 +129,66 @@
       ],
       "answer": "Rust core with Python research bindings",
       "rationale": "Rust provides no_std, SIMD, Android NDK, WASM targets; Python enables research while maintaining performance constraints",
-      "consequences": ["High performance", "Multiple platform targets", "Research accessibility", "Compilation complexity"]
+      "consequences": ["High performance", "Multiple platform targets", "Research accessibility", "Compilation complexity"],
+      "status": "accepted"
     },
     {
       "id": "D08",
-      "topic": "Balanced Numeral Family",
+      "topic": "Balanced Numeral Family (Corrected)",
       "question": "What numeral system should power TArchI arithmetic?",
       "options": [
-        {"label": "Balanced radix (Balradix)", "recommended": true, "description": "Tridak (base-3) and Baldec (base-10) for sign-free arithmetic"},
+        {"label": "Balanced radix (odd bases only) + 11-level Baldec score", "recommended": true, "description": "Tridak (base-3) for atomic ops; Baldec as scalar score, not positional radix-10"},
         {"label": "Binary", "recommended": false, "description": "Traditional digital systems"},
         {"label": "Standard decimal", "recommended": false, "description": "Human-friendly but complex sign handling"}
       ],
-      "answer": "Adopted Balradix family: Tridak (base-3) and Baldec (base-10)",
-      "rationale": "Eliminates sign bits, enables efficient negation, intuitive for decimal-familiar users",
-      "consequences": ["Sign-free arithmetic", "Canonical zero", "Efficient negation", "Specialized implementation"]
+      "answer": "Adopted Balradix family: Tridak (base-3 balanced digits {-1,0,+1}) for atomic operations; Baldec as 11-level ordinal score in 4 bits. Base-10 {-5..+5} is not a canonical positional digit set.",
+      "rationale": "Eliminates sign bits, enables efficient negation, canonical zero; Baldec is a scalar, not positional arithmetic",
+      "consequences": ["Sign-free arithmetic", "Canonical zero", "Efficient negation", "Specialized implementation", "No base-10 positional claim"],
+      "status": "accepted"
     },
     {
       "id": "D09",
-      "topic": "Binary Control Group",
+      "topic": "Binary Control Group (Revised)",
       "question": "What reference implementation should TArchI use for A/B testing?",
       "options": [
-        {"label": "Fixed oracule-core", "recommended": true, "description": "Frozen Python prototype with known bug fixed"},
-        {"label": "New implementation", "recommended": false, "description": "Independent reference"},
+        {"label": "Same-Rust codec ablation", "recommended": true, "description": "i8/enum, 2-bit packed, dense base-3, dictionary/delta on identical workloads"},
+        {"label": "Fixed oracule-core only", "recommended": false, "description": "Python prototype conflates too many variables"},
         {"label": "Industry standard", "recommended": false, "description": "Commercial LLM baseline"}
       ],
-      "answer": "Use oracule-core as frozen binary/float control group",
-      "rationale": "Direct performance comparison, bug provides improvement opportunity, enables validation",
-      "consequences": ["Direct comparison", "Bug fixation opportunity", "Backward compatibility"]
+      "answer": "Use oracule-core as historical regression oracle. Causal trit-vs-bit comparison via same-Rust engine with four storage codecs on identical workloads.",
+      "rationale": "Python-to-Rust comparison conflates language, allocator, object model, algorithms, paging, compression, and semantics. Same-runtime ablation isolates representation effect.",
+      "consequences": ["Causal isolation of trinary representation", "Additional codec variants", "Prototype retained as regression oracle"],
+      "status": "accepted",
+      "supersedes": "original D09 sole-control role"
     },
     {
       "id": "D10",
       "topic": "Constructive Generation",
       "question": "How should answers be generated without LLMs?",
       "options": [
-        {"label": "Constructive reasoning", "recommended": true, "description": "Realizer trait adapter from substrate + derivation"},
+        {"label": "Constructive reasoning from ProofDAG", "recommended": true, "description": "Realizer trait adapter from substrate + derivation"},
         {"label": "Neural generation", "recommended": false, "description": "LLM-based approaches"},
         {"label": "Template-based", "recommended": false, "description": "Pre-crafted responses"}
       ],
-      "answer": "Constructive generation via Realizer trait adapter",
-      "rationale": "No LLMs anywhere in system, ensures precise, factual, cited responses",
-      "consequences": ["Precise outputs", "No hallucination", "Limited expressiveness", "Complex knowledge requirement"]
+      "answer": "Constructive generation via Realizer trait adapter from ProofDAG with sentence-level provenance",
+      "rationale": "No LLMs anywhere in system, ensures precise, factual, cited responses; no-LLM does not forbid explicitly approved classical classifier",
+      "consequences": ["Precise outputs", "No hallucination", "Limited expressiveness", "Complex knowledge requirement", "Sentence-level provenance binding"],
+      "status": "accepted"
     },
     {
       "id": "D11",
-      "topic": "Curriculum-Based Learning",
+      "topic": "Curriculum-Based Learning (Revised)",
       "question": "How should knowledge be acquired and maintained?",
       "options": [
-        {"label": "Curriculum pipeline", "recommended": true, "description": "Corpus -> extraction -> verification -> induction -> promotion -> decay"},
+        {"label": "Curriculum pipeline with dependency-aware correction", "recommended": true, "description": "Corpus -> extraction -> verification -> induction -> promotion -> decay(priority) -> graduation -> lossless factoring"},
         {"label": "Neural training", "recommended": false, "description": "Gradient descent from data"},
         {"label": "Active learning", "recommended": false, "description": "Query-based knowledge acquisition"}
       ],
-      "answer": "Implemented curriculum-based learning pipeline",
-      "rationale": "No training step, continuous GPU-free learning, single-fact correction, verifiable facts only",
-      "consequences": ["No neural training", "Continuous learning", "GPU-free operation", "Single-fact correction", "Complex pipeline"]
+      "answer": "Curriculum-driven knowledge acquisition with versioned snapshots, reverse dependencies, decay on priority only, and lossless schema factoring in v0.1",
+      "rationale": "No neural network training; continuous GPU-free learning; single-fact correction via dependency invalidation; verifiable facts only",
+      "consequences": ["No neural training", "Continuous learning", "GPU-free operation", "Dependency-aware invalidation", "Decay ≠ forgetting logical truth"],
+      "status": "accepted",
+      "supersedes": "original D11 one-node-cost and no-forgetting guarantees"
     },
     {
       "id": "D12",
@@ -183,22 +199,25 @@
         {"label": "Open-domain", "recommended": false, "description": "General question answering"},
         {"label": "Conversational", "recommended": false, "description": "Extended dialogue capability"}
       ],
-      "answer": "v0.1 scope: closed-domain RESOLVE + EXPLAIN + CITE",
-      "rationale": "Comparable to binary control, high precision requirement, smaller implementation, clear metrics",
-      "consequences": ["Limited coverage", "High precision", "Comparable baseline", "Clear evaluation"]
+      "answer": "v0.1 scope: closed-domain question answering with RESOLVE (find answers), EXPLAIN (provide ProofDAG), and CITE (reference sources) capabilities over a curated set of domains",
+      "rationale": "Comparable to binary control, high precision requirement, smaller initial implementation, clear evaluation metrics",
+      "consequences": ["Limited domain coverage", "High precision requirement", "Comparable baseline", "Clear evaluation metrics"],
+      "status": "accepted"
     },
     {
       "id": "D13",
-      "topic": "Minimal Schema Mining",
+      "topic": "Minimal Schema Mining (Revised)",
       "question": "What schema induction should v0.1 include?",
       "options": [
-        {"label": "Minimal schema mining", "recommended": true, "description": "Only minimal instead of full ILP"},
+        {"label": "Lossless factoring only", "recommended": true, "description": "Supplied/reviewed schemas + lossless factoring; mined rules as hypotheses"},
         {"label": "Full ILP induction", "recommended": false, "description": "Complete rule extraction"},
         {"label": "No schema mining", "recommended": false, "description": "Facts only approach"}
       ],
-      "answer": "v0.1 ships with minimal schema mining, not full ILP",
-      "rationale": "Schema compression enables 10x size target, easier implementation",
-      "consequences": ["Smaller package", "Easier implementation", "Partial rule induction", "Size target achievable"]
+      "answer": "v0.1 ships with lossless schema factoring and supplied/reviewed schemas only. Induced rules are hypotheses with versioned evidence until independently accepted on held-out compositions. Full ILP deferred to M7. 10x target is falsifiable hypothesis.",
+      "rationale": "Schema compression measured, not assumed; lossless factoring ≠ inductive generalization; three examples cannot prove universal rule",
+      "consequences": ["Measured compression", "Easier implementation", "Partial rule induction", "10x target not guaranteed"],
+      "status": "accepted",
+      "supersedes": "original D13 guaranteed size consequence"
     },
     {
       "id": "D14",
@@ -211,85 +230,96 @@
       ],
       "answer": "v0.1 knowledge: curated corpus + ground truth",
       "rationale": "Measurable extraction quality and citation coverage, high-quality initial facts",
-      "consequences": ["High-quality facts", "Measurable performance", "Domain-specific focus", "Curation overhead"]
+      "consequences": ["High-quality facts", "Measurable performance", "Domain-specific focus", "Curation overhead", "Limited initial coverage"],
+      "status": "accepted"
     },
     {
       "id": "D15",
-      "topic": "Portable Knowledge Packaging",
+      "topic": "Portable Knowledge Packaging (Revised)",
       "question": "What format should knowledge packaging use?",
       "options": [
-        {"label": ".tarchi memory-mapped", "recommended": true, "description": "4KiB pages with Balradix tables"},
+        {"label": ".tarchi with block codec and lazy verification", "recommended": true, "description": "4KiB pages, u64 page table, block codec with restart points, lazy proof checks, authenticated manifest"},
         {"label": "Binary blob", "recommended": false, "description": "Compact but not memory-mapped"},
         {"label": "Database", "recommended": false, "description": "Structured storage format"}
       ],
-      "answer": ".tarchi package: memory-mapped pages with Balradix tables",
-      "rationale": "Efficient memory usage, sub-byte addressing, two-tier integrity, composable",
-      "consequences": ["Efficient memory", "Sub-byte addressing", "Integrity guarantees", "Composable"]
+      "answer": ".tarchi package: memory-mapped 4 KiB pages with u64 page table, block codec with restart points, two-tier integrity (hash + lazy semantic proof checks keyed to immutable snapshot hashes), composable namespaced immutable assertions with deterministic resolution, delta-updatable via logical record deltas with atomic manifest",
+      "rationale": "Efficient memory usage; lazy verification avoids 55-minute eager scan; authenticated manifest prevents self-reference; deterministic merge with evidence preservation",
+      "consequences": ["Efficient memory usage", "Lazy verification", "Integrity guarantees", "Composable knowledge", "Update efficiency", "Block decoding overhead"],
+      "status": "accepted",
+      "supersedes": "original D15 trit-granular residency, eager verify, merge policy, sub-byte header"
     },
     {
       "id": "D16",
-      "topic": "Astra Unit Definition",
+      "topic": "Astra Unit Definition (Revised)",
       "question": "How should 1 Astra be defined?",
       "options": [
-        {"label": "Verifiable capability", "recommended": true, "description": "27B LLM capability on both recall AND derivation"},
+        {"label": "Capability vector (no additive equivalence)", "recommended": true, "description": "Recall, derivation, abstention, contradiction, bytes, latency vs frozen 27B reference"},
         {"label": "Parameter count", "recommended": false, "description": "Simple size comparison"},
         {"label": "Knowledge-only", "recommended": false, "description": "Memorization capacity only"}
       ],
-      "answer": "1 Astra: verifiable 27B LLM capability on both knowledge-recall AND derivation",
-      "rationale": "Prevents database-only solutions, enables comprehensive intelligence comparison",
-      "consequences": ["Strict definition", "Prevents memorization", "Complex evaluation", "Two-dimensional measurement"]
+      "answer": "1 Astra = portable artifact measured by frozen two-suite capability vector against documented 27B reference. No additive parameter equivalence. 3.7 Astra does not mean 3.7× capability.",
+      "rationale": "Parameter count ≠ capability; duplicate packages add zero coverage; 90% ceiling cannot multiply to 333%; database+recursive query can genuinely derive",
+      "consequences": ["Strict capability definition", "Prevents memorization", "Complex evaluation framework", "Two-dimensional measurement", "No linear equivalence"],
+      "status": "accepted",
+      "supersedes": "original D16 additive unit"
     },
     {
       "id": "D17",
-      "topic": "Size and Memory Targets",
+      "topic": "Size and Memory Targets (Revised)",
       "question": "What efficiency targets should TArchI achieve?",
       "options": [
-        {"label": "Aggressive targets", "recommended": true, "description": "1.35GB for 1 Astra, 2GB RAM, <=1.5 bytes/fact"},
-        {"label": "Relaxed targets", "recommended": false, "description": "Higher storage requirements"},
+        {"label": "Measured whole-artifact + provisional app budget", "recommended": true, "description": "2 GB device constraint; ≤512 MiB app budget; 5 GB artifact as falsifiable target"},
+        {"label": "Aggressive derived targets", "recommended": false, "description": "1.35GB/Astra, 1.6GB hot set from byte-count arithmetic"},
         {"label": "Hardware-specific", "recommended": false, "description": "Optimized for specific devices"}
       ],
-      "answer": "Target 1.35GB for 1 Astra (vs 13.5GB reference), 2GB RAM, <=1.5 bytes/fact",
-      "rationale": "10x storage reduction enables practical deployment on consumer devices",
-      "consequences": ["Significant reduction", "Memory-efficient", "Complex implementation", "Aggressive compression"]
+      "answer": "Retain 2 GB device as acceptance constraint. Provisional app budget: 512 MiB. 5 GB artifact target retained as falsifiable aspiration pending compression evidence. Move device feasibility gate before M5.",
+      "rationale": "Sample projects ~25 GB at 3.3B facts; 1.8 GB allocation leaves ~200 MB for OS on literal 2 GB phone; 390K pinned pages exceed 1.6 GB",
+      "consequences": ["Honest density accounting", "Early device stress gate", "No assumption of new hardware", "Smaller cache may increase page faults"],
+      "status": "accepted",
+      "supersedes": "original D17 allocation model and 10x derivation"
     },
     {
       "id": "D18",
-      "topic": "Validation Metrics",
+      "topic": "Validation Metrics (Strengthened)",
       "question": "How should TArchI be validated?",
       "options": [
-        {"label": "Native + A/B testing", "recommended": true, "description": "TArchI metrics plus bit-vs-trit comparison"},
+        {"label": "Native + same-Rust codec ablation + frozen benchmark manifest", "recommended": true, "description": "TArchI metrics plus causal trit-vs-bit on identical code paths; protocol registered before test"},
         {"label": "Industry benchmarks", "recommended": false, "description": "Standard evaluation methods"},
         {"label": "User testing", "recommended": false, "description": "Human evaluation approach"}
       ],
-      "answer": "Native metrics + A/B testing against binary implementations",
-      "rationale": "Comprehensive validation with direct comparison capability",
-      "consequences": ["Comprehensive", "Direct comparison", "Multiple dimensions", "Complex testing"]
+      "answer": "Validate using TArchI-native metrics: state density, knowledge density (whole-artifact), latency, correctness, contradiction detection/correction, citation coverage, unsupported-claim rate, device footprint, and capability vector. Causal A/B via same-Rust codec ablation on identical workloads with frozen formulas.",
+      "rationale": "Comprehensive validation with causal comparison capability; multiple quality dimensions; protocol prevents post-hoc metric changes",
+      "consequences": ["Comprehensive validation", "Causal comparison", "Multiple dimensions", "Frozen protocol", "Complex testing infrastructure"],
+      "status": "accepted"
     },
     {
       "id": "D19",
-      "topic": "Rubik and Chess Layers",
+      "topic": "Rubik and Chess Layers (Revised)",
       "question": "How should reasoning and planning be structured?",
       "options": [
-        {"label": "Verification + Planning layers", "recommended": true, "description": "Rubik for verification, Chess for planning"},
+        {"label": "Independent proof checker + bounded heuristic search", "recommended": true, "description": "Rubik = deterministic verifier; Chess = best-first search with explicit budgets and resource-limit outcomes"},
         {"label": "Single unified layer", "recommended": false, "description": "Combined approach"},
         {"label": "Pure search", "recommended": false, "description": "Monte Carlo or similar"}
       ],
-      "answer": "Two layers: Rubik (verification) and Chess (planning) with Nubits generalization",
-      "rationale": "Deterministic verification + adversarial planning, comprehensive state exploration",
-      "consequences": ["Deterministic verification", "Zero hallucination", "Comprehensive exploration", "Strategic reasoning"]
+      "answer": "Two layers: Rubik (independent proof checker, deterministic verification) and Chess (bounded heuristic search with explicit budgets: 100K apps, 64 MiB frontier, 2s). Proof DAG with premise IDs, substitution, snapshot hash. No universal truth, adversarial, or shortest-path guarantee by analogy.",
+      "rationale": "Deterministic verification + bounded search; sound verification kernel; resource limits explicit to callers; De Morgan example invalid",
+      "consequences": ["Deterministic verification", "Bounded search", "Resource limits explicit", "Proof DAG not linear path", "No world-truth guarantee"],
+      "status": "accepted",
+      "supersedes": "original D19 absolute/eager claims"
     },
     {
       "id": "D20",
       "topic": "Classical Perception",
       "question": "How should perception work without LLMs?",
       "options": [
-        {"label": "Classical NLP pipeline", "recommended": true, "description": "Lexer → morphology → lexicon → parser → extraction"},
+        {"label": "Controlled-language grammar + deterministic templates", "recommended": true, "description": "Lexer → morphology → lexicon → constraint parser → semantic extraction with source qualification"},
         {"label": "Neural perception", "recommended": false, "description": "Deep learning approaches"},
         {"label": "Hybrid", "recommended": false, "description": "Combine classical and neural"}
       ],
-      "answer": "Classical NLP perception pipeline with language server ground truth",
-      "rationale": "Precise extraction with verifiable results, no hallucination",
-      "consequences": ["Precise extraction", "Verifiable results", "Language server dependency", "Limited modalities"]
+      "answer": "Classical NLP pipeline with controlled language, deterministic templates, source-qualified empirical assertions, exact source spans, held-out negation/quantifier/unit/alias cases. Classical classifier only if explicitly approved. Language servers for code ground truth. Vision/audio out of scope v0.1.",
+      "rationale": "Precise extraction with verifiable results; deterministic errors are still errors; no-LLM is narrower than no-ML; unsupported input remains unsupported",
+      "consequences": ["Precise extraction", "Verifiable results", "Source qualification", "Lower recall on prose", "Explicit ambiguity handling"],
+      "status": "accepted"
     }
   ],
   "narrative": [
@@ -297,58 +327,85 @@
       "stage": "Origin",
       "summary": "Project inception and foundational decisions",
       "key_points": ["New standalone project established", "Trinary intelligence design", "Rust core architecture chosen"],
-      "key_numbers": {"milestones": 8, "trinary_layers": 3, "node_states": 27}
+      "key_numbers": {"milestones": 8, "trinary_layers": 4, "node_states": 27}
     },
     {
       "stage": "Design interview",
       "summary": "Architectural and implementation design decisions",
-      "key_points": ["Balanced numeral family", "Binary control group strategy", "Memory-mapped knowledge packaging"],
+      "key_points": ["Balanced numeral family (corrected)", "Same-Rust codec A/B strategy", "Memory-mapped knowledge packaging with block codec"],
       "key_numbers": {"numeral_systems": 2, "package_pages": 4, "integrity_layers": 2}
     },
     {
       "stage": "The knowledge question",
       "summary": "Knowledge acquisition and maintenance strategy",
-      "key_points": ["Curriculum-based learning", "Quarantine system", "Continuous GPU-free operation"],
-      "key_numbers": {"corpus_sources": 3, "extraction_pipeline": 5, "verification_steps": 4}
+      "key_points": ["Curriculum-based learning (dependency-aware)", "Quarantine system (audit only)", "Continuous GPU-free operation with versioned snapshots"],
+      "key_numbers": {"corpus_sources": 3, "extraction_pipeline": 7, "verification_steps": 4}
     },
     {
       "stage": "Packaging and the Astra unit",
-      "summary": "Knowledge packaging and efficiency targets",
-      "key_points": ["10x storage reduction", "Sub-byte addressing", "Verifiable intelligence definition"],
-      "key_numbers": {"storage_reduction": "10x", "memory_target_gb": 1.35, "facts_per_byte": ">=0.66"}
+      "summary": "Knowledge packaging and capability measurement (revised)",
+      "key_points": ["Whole-artifact density accounting", "Capability vector replaces additive Astra", "Verifiable intelligence definition via frozen two-suite vector"],
+      "key_numbers": {"storage_reduction": "falsifiable target", "memory_target_gb": 2, "app_budget_mib": 512}
     }
   ],
   "technical_facts": [
-    {"fact": "log2(3)=1.58496 bits/trit", "implication": "Balanced ternary achieves 1.585 bits per trit, approaching theoretical maximum"},
-    {"fact": "Rubik's cube 4.3252e19 states = 66 bits vs 42 trits", "implication": "Trinary representation reduces state count vs binary by 1.8x"},
-    {"fact": "chess ~4.8e44 positions = 149 bits vs 94 trits", "implication": "Trinary chess representation saves 1.6x storage vs binary"},
-    {"fact": "8 trits = 6561 states per byte", "implication": "Sub-byte addressing enables high density in memory-mapped packages"},
-    {"fact": "TextRunner 11M triples / 500M sentences / ~91% precision", "implication": "Classical template extraction achieves high precision without neural nets"},
-    {"fact": "OWL 2 open-world semantics is already three-valued", "implication": "Semantic web standards support trinary logic"},
-    {"fact": "ILP (Aleph/Progol) generalizes rules from examples", "implication": "Inductive logic programming enables rule induction from data"},
-    {"fact": "LLM marginal storage ~10-15 bytes per fact vs TArchI target 1.5-2.5", "implication": "10x storage reduction possible vs neural networks"},
-    {"fact": "oracule-core/learning.py:211 ACTIVE NameError", "implication": "Bug fix provides immediate improvement in control group"},
+    {"fact": "log2(3)=1.58496 bits/trit", "implication": "Balanced ternary achieves 1.585 bits per trit theoretical; integer packing realizes up to 1.667 bits/trit"},
+    {"fact": "Rubik's cube 4.3252e19 states = 66 bits vs 42 trits", "implication": "Trinary representation reduces state count vs binary by 1.57x (66/42)"},
+    {"fact": "chess ~4.8e44 positions = 149 bits vs 94 trits", "implication": "Trinary chess representation saves 1.58x storage vs binary (149/94)"},
+    {"fact": "5 trits = 243 states fit in 1 byte (8 bits)", "implication": "Sub-byte dense addressing: 5 trits per byte, not 8 trits"},
+    {"fact": "8 trits = 6561 states need 13 bits (2 bytes)", "implication": "8 trits cannot fit in 1 byte; 13 bits required, contradicting earlier claim"},
+    {"fact": "TextRunner 11M triples / 500M sentences / ~91% precision", "implication": "Classical template extraction achieved high precision without neural nets on specific corpus; not a guaranteed pipeline error rate for TArchI"},
+    {"fact": "OWL 2 open-world semantics uses open-world assumption, not Kleene three-valued logic", "implication": "OWL's non-entailment is not the same as Kleene unknown; P∨¬P is true in every OWL interpretation, while Kleene unknown makes it unknown"},
+    {"fact": "ILP (Aleph/Progol) generalizes rules from examples", "implication": "Inductive logic programming enables rule induction from data; but three examples cannot prove a universal rule"},
+    {"fact": "LLM marginal storage ~10-15 bytes per fact (unverified baseline)", "implication": "No common fact definition or measurement boundary established; not a committed TArchI baseline"},
+    {"fact": "oracule-core/learning.py:211 ACTIVE NameError", "implication": "Bug fix provides immediate improvement in control group; status unverified in its repo"},
     {"fact": "oracule-core/cli.py:26 hardcoded QUERY_MAP", "implication": "Requires upgrade to consume .tarchi packages"},
-    {"fact": "Environment facts (Rust toolchain present, Python 3.12 + networkx/numpy, Node present, no Android SDK locally)", "implication": "Development environment supports current architecture choices"}
+    {"fact": "Environment facts (Rust toolchain present, Python 3.12 + networkx/numpy, Node present, no Android SDK locally)", "implication": "Development environment supports current architecture choices; device access required for M6"}
   ],
   "open_questions": [
-    {"id": "Q1", "question": "Which reference LLM defines 1 Astra", "candidates": ["Gemma-2-27B (exact 27B, license-gated)", "Qwen2.5-32B", "Mistral-Small-24B"], "recommendation": "Gemma-2-27B (exact 27B, license-gated, dev-time only)", "blocking": "M5"},
-    {"id": "Q2", "question": "Which realization registers ship in v0.1", "candidates": ["answer", "explain-with-trace", "contradiction notice", "compare", "summary"], "recommendation": "answer + explain + contradiction notice", "blocking": "M4"},
-    {"id": "Q3", "question": "Confirm browser/PWA as first device target before investing in NDK path", "candidates": ["PWA first", "Native mobile first", "Desktop browser"], "recommendation": "Browser/PWA as first target", "blocking": "M6"}
+    {
+      "id": "Q1",
+      "question": "Which reference LLM defines 1 Astra",
+      "candidates": ["Gemma-2-27B (exact 27B, license-gated)", "Qwen2.5-32B", "Mistral-Small-24B"],
+      "recommendation": "Pick one documented checkpoint before testing; access/license/quantization/prompts frozen in protocol",
+      "blocking": "M5",
+      "status": "resolved_by_adr026"
+    },
+    {
+      "id": "Q2",
+      "question": "Which realization registers ship in v0.1",
+      "candidates": ["answer", "explain-with-proof", "conflict/unknown notice", "compare", "summary"],
+      "recommendation": "answer + explain-with-proof + conflict/unknown notice",
+      "blocking": "M4",
+      "status": "resolved_by_adr023_adr028"
+    },
+    {
+      "id": "Q3",
+      "question": "Confirm browser/PWA as first device target before investing in NDK path",
+      "candidates": ["Native arm64 first", "PWA first", "Desktop browser"],
+      "recommendation": "Native Rust arm64 as resource acceptance target; PWA optional demo only",
+      "blocking": "M6",
+      "status": "resolved_by_adr027"
+    }
   ],
   "explicit_non_goals": [
     "Open-domain question answering",
     "Creative prose and conversational AI",
     "Vision and audio perception",
     "Real-time interactive fiction",
-    "Cross-language model serving"
+    "Cross-language model serving",
+    "Full ILP induction",
+    "Unbounded search / exhaustive state projection",
+    "Universal empirical truth guarantee"
   ],
   "honest_limits": [
     "Traded open-domain recall and fuzzy similarity for verifiability/density/updateability/footprint (right trade for a 2 GB phone: you cannot ship a corpus but you can ship a compressed, verified, paged theory)",
-    "LLM weights carry implicit generalities no fact table expresses, so the 10x claim holds for schema-heavy curated verified knowledge only",
+    "LLM weights carry implicit generalities no fact table expresses, so the density advantage holds for schema-heavy curated verified knowledge only",
     "Without an LLM realizer the language is precise and cited but not charming",
     "Extraction recall on prose is the weakest link",
-    "If derivation parity against a 27B reference fails, split the Astra unit into knowledge-Astra and reasoning-Astra rather than overstate"
+    "If derivation parity against a 27B reference fails, report absolute scores; do not rename baseline performance into a radix breakthrough",
+    "Axiom consistency cannot establish empirical truth; a false but consistent premise survives all checks",
+    "10x storage reduction is a falsifiable target pending matched-capability evidence, not an established property"
   ],
   "references": [
     {"kind": "prior_art", "path": "/home/fola/oracule-core"},

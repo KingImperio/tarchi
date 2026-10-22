@@ -280,11 +280,125 @@
 
 ---
 
-## Open questions
+## ADR-0021 — Truth Guarantee Scope
 
-### (Q1) which reference LLM defines 1 Astra — candidates Gemma-2-27B (exact 27B, license-gated), Qwen2.5-32B, Mistral-Small-24B; recommendation Gemma-2-27B, dev-time only; blocks M5.
+**Status:** Accepted
 
-### (Q2) which realization registers ship in v0.1 — answer, explain-with-trace, contradiction notice, compare, summary; recommendation answer + explain + contradiction notice; blocks M4.
+**Context:** The original charter claimed "hallucination is structurally impossible" and "all knowledge from axioms". The M0.6 review demonstrated that axiom consistency cannot establish empirical truth — a false but consistent premise survives all checks. The defensible guarantee is checked entailment conditional on explicit trusted premises.
 
-### (Q3) confirm browser/PWA as the first device target before investing in the NDK path; blocks M6.
+**Decision:** Replace the universal truth guarantee with: outputs are checked entailments conditional on identified trusted premises, plus source-qualified observations with explicit abstention. Empirical claims are rendered as attributed assertions, not established facts.
+
+**Consequences:** Premise/trust/context metadata required; narrower public claims; no LLM or network needed. The unrestricted 'every claim true' intent is withdrawn.
+
+**Alternatives considered:** Keep universal guarantee (rejected as unsatisfiable); add LLM fallback (rejected by founder constraint).
+
+**Supersedes:** ADR-0005 (Archaion Principle) in part; ADR-0019 (Rubik/Chess) absolute truth claim.
+
+---
+
+## ADR-0022 — Causal A/B Control
+
+**Status:** Accepted
+
+**Context:** ADR-0009 designated the Python/float oracule-core as the sole trit-vs-bit control. The M0.6 review showed this conflates language, allocator, object model, search logic, paging, compression, and numeric semantics. Any result could be dominated by Python object overhead rather than trits.
+
+**Decision:** Keep oracule-core as a historical regression oracle. For causal representation comparison, use the same Rust engine and identical workloads with four storage codecs: i8/enums, packed 2-bit ternary, dense base-3 blocks, and conventional dictionary/delta integers. Report decoding CPU, total bytes, cold/warm latency, and energy where measurable. Freeze formulas before running.
+
+**Consequences:** Additional codec/scoring variants and benchmark bookkeeping; no duplicate full application needed. Isolates trinary representation effect.
+
+**Supersedes:** ADR-0009 as the sole control; retains ADR-0018 identical-code-path intent.
+
+---
+
+## ADR-0023 — Self-Correction Mechanism
+
+**Status:** Accepted
+
+**Context:** ADR-0011 claimed "a wrong fact is fixed by editing one node" with "no catastrophic forgetting". The M0.6 review showed one premise can feed 100,000 derived conclusions; replacing its truth does not update dependents automatically. Per-session decay can discard valid knowledge simply from app opens.
+
+**Decision:** Implement versioned snapshots with reverse dependencies or recomputation. Maintain reverse dependency index or invalidate caches by snapshot and recompute. Keep rejected content excluded as proof premise but retain conflict metadata in a separate ledger. Decay applies only to search/cache priority, never to logical truth. Define scoped authority and effective dates for mutable observations.
+
+**Consequences:** Reverse dependency references cost at least 4 bytes/link if dense; 13.2 GB for 1 per 3.3B assertions before compression; recomputation avoids some storage at latency cost. Updates require O(affected closure), not O(1).
+
+**Supersedes:** ADR-0011 one-node-cost and no-forgetting guarantees.
+
+---
+
+## ADR-0024 — Schema Mining Guarantees
+
+**Status:** Accepted
+
+**Context:** ADR-0013 stated minimal schema mining makes the 10x size target achievable. The M0.6 review showed: (a) lossless factoring ≠ inductive generalization; (b) three examples cannot prove a universal rule; (c) induced rules as hard truth create false conclusions; (d) 10x claim depends on unmeasured corpus structure.
+
+**Decision:** v0.1 allows only supplied/reviewed schemas and lossless factoring of stored instances. Mined generalizations are hypotheses with versioned evidence until independently accepted on held-out compositions. Rule section is usable from first rule-bearing package with explicit v0.1 semantics. Full ILP deferred to M7. The 10x target is a falsifiable hypothesis, not an established property.
+
+**Consequences:** Defer full induction; bounded factoring experiment with exception bytes and expanded-query cost measured. Reduces first-build scope.
+
+**Supersedes:** ADR-0013 guaranteed size consequence.
+
+---
+
+## ADR-0025 — Package Storage Contract
+
+**Status:** Accepted
+
+**Context:** ADR-0015 specified trit-granular residency, unconditional eager semantic verification on load, stronger-wins merge, and global alias uniqueness. The M0.6 review found: (a) logical page ≠ OS page (Android 16 KiB); (b) entropy coding destroys independent page access; (c) 3.3B fact verification at 1M/s = 55 minutes; (d) merge order changes answers; (e) 8 trits ≠ 1 byte.
+
+**Decision:** Replace with: block codec with restart points/offset indexes; separate encoded/decoded cache caps; logical Tridak ≠ physical page. Lazy structural checks on load; authenticated manifest/root excluding self-reference; proof checks keyed to immutable theory/dep hashes. Namespaced immutable assertions with deterministic resolution function per canonical signed proposition. Evidence sets preserved. Atomic manifest publication; failed updates retain prior snapshot.
+
+**Consequences:** Block decoding and coarser faults; ~0.8% digest overhead; evidence-set storage; 1-2 weeks for format/failure-model design. Format keeps 4 KiB logical blocks; physical mapping accounts for larger pages.
+
+**Supersedes:** ADR-0015 trit-granular residency, eager full verify, merge policy, sub-byte header claims.
+
+---
+
+## ADR-0026 — Astra Capability Vector
+
+**Status:** Accepted
+
+**Context:** ADR-0016 defined Astra as "verifiable 27B LLM capability on both recall AND derivation" but ADR-0017 treated it as additive (3.7 Astra = 100B equivalence). The M0.6 review showed: (a) parameter count ≠ capability; (b) duplicate packages add zero coverage; (c) 90% ceiling cannot multiply to 333%; (c) database + recursive query can genuinely derive, so "database scores zero" is a grading policy, not architecture property.
+
+**Decision:** Replace scalar additive Astra with a versioned capability report vector: recall accuracy, multi-step proof correctness, coverage/abstention, contradiction handling, total artifact bytes, device latency. If retaining the brand, "Astra-v0 suite parity" means non-inferiority on both locked suites against a frozen reference configuration. Remove fractional-Astra extrapolation and linear parameter equivalence.
+
+**Consequences:** Additional evaluation if 100B parity claimed; no runtime dependency or reference-model download authorized. Protocol, reference checkpoint, prompts, evidence access, scoring, thresholds fixed before testing.
+
+**Supersedes:** ADR-0016 additive unit; ADR-0017 100B equivalence.
+
+---
+
+## ADR-0027 — Size and Memory Targets (Revised)
+
+**Status:** Accepted
+
+**Context:** ADR-0017 claimed 1.35 GB per Astra, 5 GB for 3.7 Astra, 2 GB resident with 1.6 GB hot set + 200 MB engine. The M0.6 review showed: sample is 7.6 B/fact total → ~25 GB at 3.3B facts; even optimistic raw triples cost 30.5 GB; 1.8 GB app allocation leaves ~200 MB for OS on a literal 2 GB phone; 390K pinned pages already exceed 1.6 GB.
+
+**Decision:** Retain 2 GB device as acceptance constraint. Replace claimed derivation with: measured whole-artifact bytes and application budget. Provisional app budget: 512 MiB (256 MiB cache, 64 MiB query/frontier, 64 MiB proof/workspace, 64 MiB engine, 64 MiB headroom). 5 GB artifact target retained as falsifiable aspiration pending compression evidence. Move device feasibility gate before M5.
+
+**Consequences:** Smaller cache can increase page faults; early device stress gate. No assumption of new hardware or funding.
+
+**Supersedes:** ADR-0017 allocation model and 10x derivation.
+
+---
+
+## ADR-0028 — Rubik/Chess Layer Guarantees
+
+**Status:** Accepted
+
+**Context:** ADR-0019 claimed "zero hallucination by construction" (Rubik), "all legal successors at once", and "Chess = adversarial planner with shortest-path guarantee". The M0.6 review showed: (a) De Morgan example admits ¬(P∧Q) from P,Q; (b) fan-out can be 10M+; depth-6 = 10¹² states; (c) no opponent model, Q is uncalibrated heuristic; (d) proof DAG needed, not linear path.
+
+**Decision:** Keep verifier/search separation. Replace with: independent proof checker + bounded heuristic search with explicit budgets (100K applications, 64 MiB frontier, 2s). Return `ResourceLimit` — never false. Proof DAG with premise IDs, substitution, snapshot hash. No universal truth, adversarial, or shortest-path guarantee by analogy.
+
+**Consequences:** Loses unconditional completeness under resource limits; must be explicit to callers. Keeps sound verification kernel.
+
+**Supersedes:** ADR-0019 absolute/eager claims; retains split architecture.
+
+---
+
+## Open questions (resolved or superseded)
+
+### (Q1) which reference LLM defines 1 Astra — **RESOLVED**: Ada replaced by capability vector (ADR-026). Frozen 27B reference checkpoint still needed for dev-time comparison; candidate Gemma-2-27B (exact 27B, license-gated), Qwen2.5-32B, Mistral-Small-24B. Pick one documented checkpoint before testing; access/license/quantization/prompts frozen in protocol.
+
+### (Q2) which realization registers ship in v0.1 — **RESOLVED**: answer, explain-with-proof, conflict/unknown notice only. Source qualification required; compare/summary deferred. ADR-023/ADR-028 enforce sentence-level provenance.
+
+### (Q3) confirm browser/PWA as the first device target — **RESOLVED**: native Rust arm64 is the resource acceptance target; PWA optional demo only. Minimal CLI/harness on actual 2 GB phone; bounded file reads, 512 MiB budget. Move feasibility spike ahead of M5 (ADR-027). If tooling/access forces PWA, timebox 2-day spike on real device; do not claim mmap equivalence.
 
